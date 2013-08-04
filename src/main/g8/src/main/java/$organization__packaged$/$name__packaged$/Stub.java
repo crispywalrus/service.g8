@@ -1,4 +1,4 @@
-package $organization_id$.$name_id$;
+package $organization.$name$;
 
 public class Stub {
 
