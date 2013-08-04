@@ -16,7 +16,7 @@ auto generate projects.
 ## usage
 
 * [Install g8](http://github.com/n8han/giter8#readme)
-* from the shell run "g8 crispwalrus/service.g8"
+* from the shell run "g8 crispwalrus/service
 * cd ${app.name}
 * sbt compile
 
