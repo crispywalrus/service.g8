@@ -1,4 +1,4 @@
-package $organization.$name$;
+package $organization$.$name$;
 
 public class Stub {
 
