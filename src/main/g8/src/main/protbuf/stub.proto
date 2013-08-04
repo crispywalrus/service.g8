@@ -1,0 +1,7 @@
+package $organization$.$name$.proto;
+
+message Stub {
+  required string one=1;
+  repeated string twos=2;
+  optional string three=3 [default="three"];
+}
