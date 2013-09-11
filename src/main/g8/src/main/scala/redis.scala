@@ -10,56 +10,59 @@ package $organization$.$name$ {
     import com.lambdaworks.redis._
     import com.lambdaworks.redis.codec._
 
-    trait RedisStore {
-      def get(key: String): Future[Array[Byte]]
-      def put(key: String,value: Array[Byte]): Future[String]
+    trait RedisStore[K,V] {
+      def async: RedisAsyncConnection[K,V]
+      def conn: RedisConnection[K,V]
     }
 
-    class ByteArrayCodec extends RedisCodec[String,Array[Byte]] {
-      val charset:Charset = Charset.forName("UTF-8")
-      val decoder:CharsetDecoder  = charset.newDecoder()
-      var chars:CharBuffer = CharBuffer.allocate(1024)
+    class ByteArrayCodec(charset: String="UTF-8") extends RedisCodec[String,Array[Byte]] {
+      val charset:Charset = Charset.forName(charset)
 
-      def decodeKey(bytes:ByteBuffer):String = decode(bytes)
-
-      def decodeValue(bytes:ByteBuffer):Array[Byte] = {
-        bytes.mark()
-        val retv:Array[Byte] = bytes.array()
-        bytes.reset()
-        retv
+      def decodeKey(bytes:ByteBuffer):String = {
+        new String(decodeValue(bytes),charset)
       }
 
-      def encodeKey(key:String):Array[Byte] = encode(key)
+      def decodeValue(bytes:ByteBuffer):Array[Byte] = {
+        decode(bytes)
+      }
+
+      def encodeKey(key:String):Array[Byte] = {
+        key.getBytes(charset)
+      }
 
       def encodeValue(value:Array[Byte]):Array[Byte] = value
 
       def decode(bytes:ByteBuffer):String = {
-        chars.clear()
-        bytes.mark()
-
-        decoder.reset();
-        Iterator.continually(decoder.decode(bytes,chars,true)).takeWhile(_ == OVERFLOW || decoder.flush(chars) == OVERFLOW).foreach({
-                                                                                                                                         result =>
-                                                                                                                                         chars = CharBuffer.allocate(chars.capacity * 2)
-                                                                                                                                         bytes.reset
-                                                                                                                                       })
-
-        chars.flip().toString()
+        if( bytes.hasArray() )
+          bytes.array()
+        else {
+          val retv:Array[Byte] = new Array[Byte](bytes.limit())
+          bytes.get(retv)
+          retv
+        }
       }
-
-      def encode(string:String):Array[Byte] = string.getBytes(charset)
     }
 
-    class LettuceStore(javaProps:Properties) extends RedisStore {
+    /**
+      * this expect hosts to be described as 'hostname[:port]' pairs
+      * (with port optional) seperated by comma's
+      */
+    class LettuceStore(hostConfig: String,master: Option[String]) extends RedisStore[String,Array[Byte]] {
+      val hosts = conf.split(",").map( x => x.split(":")).map( z =>
+        if( z.length > 1) {
+          new config(z(0),z(1).toInt)
+        } else {
+          new config(z(0))
+        })
 
-      val readHosts = Stream.continually(javaProps.getProperty("redis.read.slave.hosts","localhost").split(",").map({ host => new RedisClient(host) }).map({ client => new KeyValue(client,client.connectAsync(new ByteArrayCodec)) }))
-      val writeHosts = Stream.continually(javaProps.getProperty("redis.write.master.host","localhost").split(",").map({ host => new RedisClient(host) }).map({ client => new KeyValue(client,client.connectAsync(new ByteArrayCodec)) }))
-
-      def get(key: String): Future[Array[Byte]] = readHosts.take(1).map(kva => kva(0).value.get(key)).head
-
-      def put(key: String,value: Array[Byte]): Future[String] = { writeHosts.take(1).map(kva => kva(0).value.set(key,value)).head }
+      val writer = master.map( m => m.split(":").map( h =>
+        if( h.length > 1) {
+          new config(h(0),h(1).toInt)
+        } else {
+          new config(h(0))
+        }))
     }
-
   }
+}
 
 }
