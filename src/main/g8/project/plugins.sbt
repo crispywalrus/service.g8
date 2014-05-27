@@ -1,26 +1,25 @@
-resolvers ++= Seq(
-  "jgit-repo" at "http://download.eclipse.org/jgit/maven",
-  "gseitz" at "http://gseitz.github.io/maven/"
-)
+resolvers += "jgit-repo" at "http://download.eclipse.org/jgit/maven"
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "0.5.0")
+addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.3.1")
 
-addSbtPlugin("org.ensime" % "ensime-sbt-cmd" % "0.1.1")
+addSbtPlugin("com.github.gseitz" % "sbt-protobuf" % "0.3.3")
 
-addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.7.3")
+addSbtPlugin("org.ensime" % "ensime-sbt-cmd" % "0.1.2")  
 
-addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "0.3.2")
+addSbtPlugin("com.github.gseitz" % "sbt-release" % "0.8.3")
 
-addSbtPlugin("com.github.gseitz" % "sbt-protobuf" % "0.3.0")
+addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "0.6.4")
 
-addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.2.5")
+addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.7.4")
 
-addSbtPlugin("com.github.gseitz" % "sbt-release" % "0.7")
+addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.1.6")
+
+addSbtPlugin("com.earldouglas" % "xsbt-web-plugin" % "0.9.0")
+
+addSbtPlugin("org.scala-sbt.plugins" % "sbt-onejar" % "0.8")
+
+addSbtPlugin("org.scala-sbt" % "sbt-closure" % "0.1.4.1")
 
 addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "2.2.0")
 
 addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.5.1")
-
-addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.1.2")
-
-addSbtPlugin("com.github.retronym" % "sbt-onejar" % "0.8")
